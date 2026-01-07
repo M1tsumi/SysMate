@@ -32,3 +32,5 @@ async-trait = "0.1"
 disk_analyzer = { path = "../modules/disk_analyzer" }
 service_manager = { path = "../modules/service_manager" }
 package_manager = { path = "../modules/package_manager" }
+startup_manager = { path = "../modules/startup_manager" }
+system_cleaner = { path = "../modules/system_cleaner" }

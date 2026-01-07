@@ -15,13 +15,13 @@ pub struct PackageStats {
 #[derive(Debug, Clone)]
 pub struct PackageInfo {
     pub name: String,
-/// Get package statistics from APT
-/// 
-/// Queries dpkg and apt for installed, upgradeable, and auto-removable packages.
     pub version: String,
     pub description: String,
 }
 
+/// Get package statistics from APT
+/// 
+/// Queries dpkg and apt for installed, upgradeable, and auto-removable packages.
 pub fn get_package_stats() -> Result<PackageStats> {
     let mut stats = PackageStats {
         total_installed: 0,
@@ -105,6 +105,116 @@ pub fn list_recent_packages(limit: usize) -> Result<Vec<PackageInfo>> {
     }
     
     Ok(packages)
+}
+
+/// List upgradeable packages
+pub fn list_upgradeable_packages() -> Result<Vec<PackageInfo>> {
+    let mut packages = Vec::new();
+    
+    if let Ok(output) = Command::new("apt")
+        .args(&["list", "--upgradable"])
+        .output()
+    {
+        let output_str = String::from_utf8_lossy(&output.stdout);
+        
+        for line in output_str.lines() {
+            if line.contains("upgradable") {
+                let parts: Vec<&str> = line.split_whitespace().collect();
+                if parts.len() >= 2 {
+                    let name = parts[0].split('/').next().unwrap_or("").to_string();
+                    let version = parts[1].to_string();
+                    
+                    packages.push(PackageInfo {
+                        name,
+                        version,
+                        description: "Available for upgrade".to_string(),
+                    });
+                }
+            }
+        }
+    }
+    
+    Ok(packages)
+}
+
+/// Search for packages by name
+pub fn search_packages(query: &str) -> Result<Vec<PackageInfo>> {
+    let mut packages = Vec::new();
+    
+    if let Ok(output) = Command::new("apt-cache")
+        .args(&["search", query])
+        .output()
+    {
+        let output_str = String::from_utf8_lossy(&output.stdout);
+        
+        for line in output_str.lines().take(50) {
+            if let Some((name, description)) = line.split_once(" - ") {
+                packages.push(PackageInfo {
+                    name: name.trim().to_string(),
+                    version: String::new(),
+                    description: description.trim().to_string(),
+                });
+            }
+        }
+    }
+    
+    Ok(packages)
+}
+
+/// Get detailed package information
+pub fn get_package_info(package: &str) -> Result<PackageInfo> {
+    let output = Command::new("dpkg-query")
+        .args(&["-W", "-f=${Package}\n${Version}\n${Description}", package])
+        .output()?;
+    
+    let output_str = String::from_utf8_lossy(&output.stdout);
+    let lines: Vec<&str> = output_str.lines().collect();
+    
+    Ok(PackageInfo {
+        name: lines.get(0).unwrap_or(&"").to_string(),
+        version: lines.get(1).unwrap_or(&"").to_string(),
+        description: lines.get(2).unwrap_or(&"").to_string(),
+    })
+}
+
+/// Upgrade all packages (requires sudo)
+pub fn upgrade_packages() -> Result<()> {
+    Command::new("pkexec")
+        .args(&["apt-get", "update"])
+        .output()?;
+    
+    Command::new("pkexec")
+        .args(&["apt-get", "upgrade", "-y"])
+        .output()?;
+    
+    Ok(())
+}
+
+/// Install a package (requires sudo)
+pub fn install_package(package: &str) -> Result<()> {
+    Command::new("pkexec")
+        .args(&["apt-get", "install", "-y", package])
+        .output()?;
+    
+    Ok(())
+}
+
+/// Remove a package (requires sudo)
+pub fn remove_package(package: &str) -> Result<()> {
+    Command::new("pkexec")
+        .args(&["apt-get", "remove", "-y", package])
+        .output()?;
+    
+    Ok(())
+}
+
+/// Autoremove unused packages (requires sudo)
+pub fn autoremove_packages() -> Result<()> {
+    Command::new("pkexec")
+        .args(&["apt-get", "autoremove", "-y"])
+        .output()?;
+    
+    Ok(())
 }
 
 /// Count installed Snap packages

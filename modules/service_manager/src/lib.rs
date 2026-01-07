@@ -43,8 +43,13 @@ impl ServiceState {
 
 /// List systemd services with their current status
 /// 
-/// Queries systemctl for service information. Limited to 50 services for alpha.
+/// Queries systemctl for service information.
 pub fn list_services() -> Result<Vec<ServiceInfo>> {
+    list_services_with_limit(None)
+}
+
+/// List systemd services with optional limit
+pub fn list_services_with_limit(limit: Option<usize>) -> Result<Vec<ServiceInfo>> {
     let mut services = Vec::new();
     
     // Get list of services using systemctl
@@ -57,8 +62,13 @@ pub fn list_services() -> Result<Vec<ServiceInfo>> {
     }
     
     let output_str = String::from_utf8_lossy(&output.stdout);
+    let lines: Vec<&str> = if let Some(lim) = limit {
+        output_str.lines().take(lim).collect()
+    } else {
+        output_str.lines().collect()
+    };
     
-    for line in output_str.lines().take(50) { // Limit to first 50 services for alpha
+    for line in lines {
         let parts: Vec<&str> = line.split_whitespace().collect();
         if parts.len() < 2 {
             continue;
@@ -119,4 +129,84 @@ pub fn list_services() -> Result<Vec<ServiceInfo>> {
     });
     
     Ok(services)
+}
+
+/// Filter services by state
+pub fn filter_services_by_state(services: &[ServiceInfo], state: &ServiceState) -> Vec<ServiceInfo> {
+    services.iter()
+        .filter(|s| s.state == *state)
+        .cloned()
+        .collect()
+}
+
+/// Search services by name
+pub fn search_services(query: &str) -> Result<Vec<ServiceInfo>> {
+    let all_services = list_services()?;
+    Ok(all_services.into_iter()
+        .filter(|s| s.name.to_lowercase().contains(&query.to_lowercase()))
+        .collect())
+}
+
+/// Start a service (requires sudo)
+pub fn start_service(service: &str) -> Result<()> {
+    Command::new("pkexec")
+        .args(&["systemctl", "start", &format!("{}.service", service)])
+        .output()?;
+    Ok(())
+}
+
+/// Stop a service (requires sudo)
+pub fn stop_service(service: &str) -> Result<()> {
+    Command::new("pkexec")
+        .args(&["systemctl", "stop", &format!("{}.service", service)])
+        .output()?;
+    Ok(())
+}
+
+/// Restart a service (requires sudo)
+pub fn restart_service(service: &str) -> Result<()> {
+    Command::new("pkexec")
+        .args(&["systemctl", "restart", &format!("{}.service", service)])
+        .output()?;
+    Ok(())
+}
+
+/// Enable a service (requires sudo)
+pub fn enable_service(service: &str) -> Result<()> {
+    Command::new("pkexec")
+        .args(&["systemctl", "enable", &format!("{}.service", service)])
+        .output()?;
+    Ok(())
+}
+
+/// Disable a service (requires sudo)
+pub fn disable_service(service: &str) -> Result<()> {
+    Command::new("pkexec")
+        .args(&["systemctl", "disable", &format!("{}.service", service)])
+        .output()?;
+    Ok(())
+}
+
+/// Get service logs
+pub fn get_service_logs(service: &str, lines: usize) -> Result<String> {
+    let output = Command::new("journalctl")
+        .args(&[
+            "-u",
+            &format!("{}.service", service),
+            "-n",
+            &lines.to_string(),
+            "--no-pager"
+        ])
+        .output()?;
+    
+    Ok(String::from_utf8_lossy(&output.stdout).to_string())
+}
+
+/// Get detailed service status
+pub fn get_service_status(service: &str) -> Result<String> {
+    let output = Command::new("systemctl")
+        .args(&["status", &format!("{}.service", service), "--no-pager"])
+        .output()?;
+    
+    Ok(String::from_utf8_lossy(&output.stdout).to_string())
 }

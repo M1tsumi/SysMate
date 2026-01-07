@@ -9,3 +9,4 @@ license.workspace = true
 gtk4.workspace = true
 libadwaita.workspace = true
 anyhow.workspace = true
+dirs = "5.0"

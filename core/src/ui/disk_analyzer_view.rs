@@ -1,9 +1,9 @@
 //! Disk Analyzer View
 //! 
-//! Shows disk usage for all mounted filesystems with visual progress indicators.
+//! Shows disk usage for all mounted filesystems with visual progress indicators and folder analysis.
 
 use gtk4::prelude::*;
-use gtk4::{Box as GtkBox, Label, Orientation, ProgressBar};
+use gtk4::{Box as GtkBox, Label, Orientation, ProgressBar, Button};
 use libadwaita as adw;
 use adw::prelude::*;
 
@@ -17,8 +17,13 @@ impl DiskAnalyzerView {
 
         // Header
         let header = adw::HeaderBar::new();
-        let title = adw::WindowTitle::new("Disk Analyzer", "");
+        let title = adw::WindowTitle::new("Disk Analyzer", "Analyze disk usage");
         header.set_title_widget(Some(&title));
+        
+        let refresh_btn = Button::with_label("Refresh");
+        refresh_btn.set_icon_name("view-refresh-symbolic");
+        header.pack_end(&refresh_btn);
+        
         root.append(&header);
 
         // Content area
@@ -49,6 +54,14 @@ impl DiskAnalyzerView {
                     progress.set_fraction(mount.used_percentage() / 100.0);
                     progress.set_show_text(true);
                     progress.set_text(Some(&format!("{:.1}%", mount.used_percentage())));
+                    
+                    // Color code the progress bar based on usage
+                    if mount.used_percentage() > 90.0 {
+                        progress.add_css_class("error");
+                    } else if mount.used_percentage() > 75.0 {
+                        progress.add_css_class("warning");
+                    }
+                    
                     usage_box.append(&progress);
 
                     let info_label = Label::new(Some(&format!(
@@ -83,6 +96,66 @@ impl DiskAnalyzerView {
                 content.append(&status);
             }
         }
+
+        // Large folders section
+        let large_folders_group = adw::PreferencesGroup::new();
+        large_folders_group.set_title("Large Folders in Home Directory");
+        large_folders_group.set_description(Some("Folders taking up significant disk space"));
+
+        match disk_analyzer::get_common_large_folders() {
+            Ok(folders) => {
+                for folder in folders.iter().take(10) {
+                    let row = adw::ActionRow::new();
+                    
+                    if let Some(name) = folder.path.file_name() {
+                        row.set_title(&name.to_string_lossy());
+                    } else {
+                        row.set_title(&folder.path.display().to_string());
+                    }
+                    
+                    row.set_subtitle(&format!(
+                        "{} ({} files, {} folders)",
+                        folder.format_size(),
+                        folder.file_count,
+                        folder.dir_count
+                    ));
+                    
+                    let icon = gtk4::Image::from_icon_name("folder-symbolic");
+                    row.add_prefix(&icon);
+                    
+                    let size_label = Label::new(Some(&folder.format_size()));
+                    size_label.add_css_class("title-3");
+                    row.add_suffix(&size_label);
+                    
+                    large_folders_group.add(&row);
+                }
+            }
+            Err(e) => {
+                let error_row = adw::ActionRow::new();
+                error_row.set_title("Error scanning folders");
+                error_row.set_subtitle(&e.to_string());
+                large_folders_group.add(&error_row);
+            }
+        }
+
+        content.append(&large_folders_group);
+
+        // Cleanup suggestions
+        let suggestions_group = adw::PreferencesGroup::new();
+        suggestions_group.set_title("Cleanup Suggestions");
+        suggestions_group.set_description(Some("Common ways to free up disk space"));
+
+        for suggestion in disk_analyzer::get_cleanup_suggestions() {
+            let row = adw::ActionRow::new();
+            row.set_title(&suggestion);
+            
+            let icon = gtk4::Image::from_icon_name("user-trash-symbolic");
+            row.add_prefix(&icon);
+            
+            suggestions_group.add(&row);
+        }
+
+        content.append(&suggestions_group);
 
         let scrolled = gtk4::ScrolledWindow::new();
         scrolled.set_vexpand(true);
