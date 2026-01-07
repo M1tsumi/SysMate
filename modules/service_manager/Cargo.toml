@@ -1,0 +1,12 @@
+[package]
+name = "service_manager"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+gtk4.workspace = true
+libadwaita.workspace = true
+anyhow.workspace = true
+tokio.workspace = true

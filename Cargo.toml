@@ -1,0 +1,28 @@
+[workspace]
+members = [
+    "core",
+    "modules/disk_analyzer",
+    "modules/package_manager",
+    "modules/service_manager",
+    "modules/startup_manager",
+    "modules/system_cleaner",
+]
+resolver = "2"
+
+[workspace.package]
+version = "1.0.0-alpha1"
+edition = "2021"
+authors = ["SysMate Team"]
+license = "GPL-3.0-or-later"
+
+[workspace.dependencies]
+gtk4 = "0.9"
+libadwaita = "0.7"
+tokio = { version = "1.35", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0"
+thiserror = "1.0"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+nix = { version = "0.28", features = ["user", "fs"] }

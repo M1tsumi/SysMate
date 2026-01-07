@@ -1,0 +1,34 @@
+[package]
+name = "sysmate"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "sysmate"
+path = "src/main.rs"
+
+[dependencies]
+gtk4.workspace = true
+libadwaita.workspace = true
+tokio.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+anyhow.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+
+# System information
+sysinfo = "0.30"
+nix = { version = "0.28", features = ["user"] }
+
+# Module system
+libloading = "0.8"
+async-trait = "0.1"
+
+# Modules
+disk_analyzer = { path = "../modules/disk_analyzer" }
+service_manager = { path = "../modules/service_manager" }
+package_manager = { path = "../modules/package_manager" }
