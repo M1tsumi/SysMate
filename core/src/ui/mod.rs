@@ -6,6 +6,7 @@ mod package_manager_view;
 mod service_manager_view;
 mod startup_manager_view;
 mod system_cleaner_view;
+mod task_manager_view;
 
 pub use main_window::MainWindow;
 pub use sidebar::Sidebar;
@@ -15,3 +16,4 @@ pub use package_manager_view::PackageManagerView;
 pub use service_manager_view::ServiceManagerView;
 pub use startup_manager_view::StartupManagerView;
 pub use system_cleaner_view::SystemCleanerView;
+pub use task_manager_view::TaskManagerView;

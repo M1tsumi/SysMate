@@ -3,7 +3,7 @@
 //! Shows disk usage for all mounted filesystems with visual progress indicators and folder analysis.
 
 use gtk4::prelude::*;
-use gtk4::{Box as GtkBox, Label, Orientation, ProgressBar, Button};
+use gtk4::{Box as GtkBox, Label, Orientation, ProgressBar};
 use libadwaita as adw;
 use adw::prelude::*;
 
@@ -14,17 +14,6 @@ pub struct DiskAnalyzerView {
 impl DiskAnalyzerView {
     pub fn new() -> Self {
         let root = GtkBox::new(Orientation::Vertical, 0);
-
-        // Header
-        let header = adw::HeaderBar::new();
-        let title = adw::WindowTitle::new("Disk Analyzer", "Analyze disk usage");
-        header.set_title_widget(Some(&title));
-        
-        let refresh_btn = Button::with_label("Refresh");
-        refresh_btn.set_icon_name("view-refresh-symbolic");
-        header.pack_end(&refresh_btn);
-        
-        root.append(&header);
 
         // Content area
         let content = GtkBox::new(Orientation::Vertical, 24);

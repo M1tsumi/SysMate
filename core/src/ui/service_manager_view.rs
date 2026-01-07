@@ -17,16 +17,6 @@ impl ServiceManagerView {
     pub fn new() -> Self {
         let root = GtkBox::new(Orientation::Vertical, 0);
 
-        let header = adw::HeaderBar::new();
-        let title = adw::WindowTitle::new("Service Manager", "Manage systemd services");
-        header.set_title_widget(Some(&title));
-        
-        let refresh_btn = Button::with_label("Refresh");
-        refresh_btn.set_icon_name("view-refresh-symbolic");
-        header.pack_end(&refresh_btn);
-        
-        root.append(&header);
-
         // Filter and search bar
         let toolbar = GtkBox::new(Orientation::Horizontal, 12);
         toolbar.set_margin_top(12);
@@ -138,13 +128,6 @@ impl ServiceManagerView {
 
         // Initial population
         populate_services(&content, &services_rc, None, None);
-
-        // Refresh button handler
-        let content_clone = content.clone();
-        let services_clone = services_rc.clone();
-        refresh_btn.connect_clicked(move |_| {
-            populate_services(&content_clone, &services_clone, None, None);
-        });
 
         // Filter dropdown handler
         let content_clone = content.clone();

@@ -17,13 +17,6 @@ impl SystemView {
     pub fn new() -> Self {
         let root = GtkBox::new(Orientation::Vertical, 0);
 
-        // Header
-        let header = adw::HeaderBar::new();
-        let title = adw::WindowTitle::new("System Information", "");
-        header.set_title_widget(Some(&title));
-        
-        root.append(&header);
-
         // Content area
         let content = GtkBox::new(Orientation::Vertical, 24);
         content.set_margin_top(24);

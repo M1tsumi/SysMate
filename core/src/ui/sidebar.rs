@@ -13,12 +13,6 @@ impl Sidebar {
         root.set_width_request(250);
         root.add_css_class("sidebar");
 
-        // Header
-        let header = adw::HeaderBar::new();
-        let title = adw::WindowTitle::new("Modules", "");
-        header.set_title_widget(Some(&title));
-        root.append(&header);
-
         // Module list
         let list_box = ListBox::new();
         list_box.set_selection_mode(SelectionMode::Single);
@@ -27,6 +21,7 @@ impl Sidebar {
         // Add modules with their stack page names
         let modules = vec![
             ("System Info", "computer-symbolic", "system"),
+            ("Task Manager", "utilities-system-monitor-symbolic", "tasks"),
             ("Disk Analyzer", "drive-harddisk-symbolic", "disk"),
             ("Package Manager", "package-x-generic-symbolic", "packages"),
             ("Service Manager", "preferences-system-symbolic", "services"),
@@ -49,7 +44,7 @@ impl Sidebar {
         list_box.connect_row_selected(move |_, row| {
             if let Some(row) = row {
                 let index = row.index() as usize;
-                let page_names = ["system", "disk", "packages", "services", "startup", "cleaner"];
+                let page_names = ["system", "tasks", "disk", "packages", "services", "startup", "cleaner"];
                 if let Some(&page_name) = page_names.get(index) {
                     stack_clone.set_visible_child_name(page_name);
                 }

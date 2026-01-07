@@ -1,15 +1,18 @@
-use gtk4::{Stack, StackTransitionType};
+use gtk4::{Stack, StackTransitionType, Button, Box as GtkBox, Orientation};
 use libadwaita as adw;
+use adw::prelude::*;
 
-use super::{Sidebar, SystemView, DiskAnalyzerView, PackageManagerView, 
+use super::{Sidebar, SystemView, TaskManagerView, DiskAnalyzerView, PackageManagerView, 
             ServiceManagerView, StartupManagerView, SystemCleanerView};
 
 pub struct MainWindow {
-    root: adw::Flap,
+    root: GtkBox,
 }
 
 impl MainWindow {
     pub fn new() -> Self {
+        let root = GtkBox::new(Orientation::Vertical, 0);
+        
         // Create stack for switching views
         let stack = Stack::new();
         stack.set_transition_type(StackTransitionType::Crossfade);
@@ -18,6 +21,9 @@ impl MainWindow {
         // Add all views to stack
         let system_view = SystemView::new();
         stack.add_titled(&system_view.build(), Some("system"), "System Info");
+
+        let task_view = TaskManagerView::new();
+        stack.add_titled(&task_view.build(), Some("tasks"), "Task Manager");
 
         let disk_view = DiskAnalyzerView::new();
         stack.add_titled(&disk_view.build(), Some("disk"), "Disk Analyzer");
@@ -48,10 +54,39 @@ impl MainWindow {
         flap.set_swipe_to_open(true);
         flap.set_swipe_to_close(true);
 
-        Self { root: flap }
+        // Create header bar with menu button for sidebar
+        let header = adw::HeaderBar::new();
+        
+        // Add sidebar toggle button
+        let toggle_button = Button::from_icon_name("open-menu-symbolic");
+        let flap_clone = flap.clone();
+        toggle_button.connect_clicked(move |_| {
+            let reveal = flap_clone.reveals_flap();
+            flap_clone.set_reveal_flap(!reveal);
+        });
+        header.pack_start(&toggle_button);
+        
+        // Get title from current stack page
+        let title = adw::WindowTitle::new("SysMate", "System Info");
+        header.set_title_widget(Some(&title));
+        
+        // Update title when stack changes
+        let title_clone = title.clone();
+        stack.connect_visible_child_notify(move |stack| {
+            if let Some(page) = stack.visible_child() {
+                if let Some(page_title) = stack.page(&page).title() {
+                    title_clone.set_subtitle(&page_title);
+                }
+            }
+        });
+
+        root.append(&header);
+        root.append(&flap);
+
+        Self { root }
     }
 
-    pub fn build(&self) -> adw::Flap {
+    pub fn build(&self) -> GtkBox {
         self.root.clone()
     }
 }

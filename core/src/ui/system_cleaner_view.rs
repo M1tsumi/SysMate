@@ -15,16 +15,6 @@ impl SystemCleanerView {
         let root = GtkBox::new(Orientation::Vertical, 0);
         root.add_css_class("system-cleaner-view");
 
-        let header = adw::HeaderBar::new();
-        let title = adw::WindowTitle::new("System Cleaner", "Free up disk space");
-        header.set_title_widget(Some(&title));
-        
-        let scan_btn = Button::with_label("Scan");
-        scan_btn.set_icon_name("system-search-symbolic");
-        header.pack_end(&scan_btn);
-        
-        root.append(&header);
-
         // Warning label
         let warning_label = Label::new(Some("Cleaning system files requires administrator privileges for some operations"));
         warning_label.set_margin_top(12);
@@ -72,16 +62,10 @@ impl SystemCleanerView {
 
         let items = Rc::new(RefCell::new(Vec::new()));
         
-        // Scan button handler
-        let list_box_clone = list_box.clone();
-        let items_clone = items.clone();
-        let total_label_clone = total_label.clone();
-        let clean_button_clone = clean_button.clone();
-        scan_btn.connect_clicked(move |_| {
-            Self::scan_items(&list_box_clone, &items_clone, &total_label_clone);
-            clean_button_clone.set_sensitive(true);
-        });
-
+        // Initial scan
+        Self::scan_items(&list_box, &items, &total_label);
+        clean_button.set_sensitive(true);
+        
         // Clean button handler
         let list_box_clone = list_box.clone();
         let items_clone = items.clone();

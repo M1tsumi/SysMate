@@ -15,16 +15,6 @@ impl StartupManagerView {
         let root = GtkBox::new(Orientation::Vertical, 0);
         root.add_css_class("startup-manager-view");
 
-        let header = adw::HeaderBar::new();
-        let title = adw::WindowTitle::new("Startup Manager", "Manage autostart applications");
-        header.set_title_widget(Some(&title));
-        
-        let refresh_btn = Button::with_label("Refresh");
-        refresh_btn.set_icon_name("view-refresh-symbolic");
-        header.pack_end(&refresh_btn);
-        
-        root.append(&header);
-
         // Info label
         let info_label = Label::new(Some("Autostart applications run when you log in to your desktop session"));
         info_label.set_margin_top(12);
@@ -49,13 +39,6 @@ impl StartupManagerView {
 
         let apps = Rc::new(RefCell::new(Vec::new()));
         
-        // Refresh button handler
-        let list_box_clone = list_box.clone();
-        let apps_clone = apps.clone();
-        refresh_btn.connect_clicked(move |_| {
-            Self::populate_list(&list_box_clone, &apps_clone);
-        });
-
         // Initial population
         Self::populate_list(&list_box, &apps);
 

@@ -31,6 +31,10 @@ fn build_ui(app: &Application) {
     // Initialize Libadwaita
     adw::init().expect("Failed to initialize Libadwaita");
 
+    // Enable dark theme
+    let style_manager = adw::StyleManager::default();
+    style_manager.set_color_scheme(adw::ColorScheme::PreferDark);
+
     // Create and show the main application
     let health_app = HealthCenterApp::new(app);
     health_app.show();

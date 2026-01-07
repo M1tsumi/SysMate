@@ -1,56 +1,56 @@
 # SysMate
 
-A modular system management dashboard for Linux that unifies common maintenance tasks. Your friendly system companion.
+A Linux system management tool that puts all your common maintenance tasks in one place. Think of it as a control center for keeping your system running smoothly.
 
-## Features
+## What it does
 
-- 🎯 **Modular Architecture**: Each feature is an independent module
-- 🔒 **Secure**: PolicyKit integration for privileged operations
-- 🎨 **Native Look**: Built with GTK4 and Libadwaita
-- 📦 **Easy Distribution**: Snap, .deb, and Flatpak support
+SysMate brings together the tools you need for system maintenance without constantly switching between different apps. Each feature runs as its own module, so you only load what you need.
 
-## Modules
+The UI is built with GTK4 and Libadwaita, so it looks right at home on modern Linux desktops. For anything that needs root access, we use PolicyKit to handle permissions the proper way.
 
-### Phase 1 - Foundation
-- ✅ Core Dashboard with module loader
-- ✅ Basic system info display
+## Current features
 
-### Phase 2 - Essential Modules (In Development)
-- 🔄 Disk Analyzer
-- 🔄 Package Manager
-- 🔄 Service Manager
+**Working now:**
+- System information dashboard
+- Task manager with live resource monitoring
+- Disk space analyzer
+- Package manager interface
+- Service management
+- Startup programs control
+- System cleanup tools
 
-### Phase 3+ - Coming Soon
-- Startup Manager
-- System Cleaner
-- Resource Monitor
-- Backup Manager
+**On the roadmap:**
+- Backup management
+- Network monitoring
+- Log viewer
 
-## Building
+## Building from source
+
+You'll need GTK4 and Libadwaita development files installed:
 
 ```bash
-# Install dependencies (Ubuntu/Debian)
+# Ubuntu/Debian
 sudo apt install libgtk-4-dev libadwaita-1-dev build-essential
 
-# Build
+# Build and run
 cargo build --release
-
-# Run
 cargo run --bin sysmate
 ```
 
-## Development
-
-This project uses a Cargo workspace with the following structure:
+## Project structure
 
 ```
 sysmate/
-├── core/           # Main application
-└── modules/        # Feature modules
+├── core/           # Main app and UI
+└── modules/        # Individual feature modules
     ├── disk_analyzer/
     ├── package_manager/
-    └── service_manager/
+    ├── service_manager/
+    ├── startup_manager/
+    └── system_cleaner/
 ```
+
+Each module is independent, making it easier to work on features without touching the core app.
 
 ## License
 

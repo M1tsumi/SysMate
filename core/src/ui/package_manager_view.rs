@@ -15,16 +15,6 @@ impl PackageManagerView {
     pub fn new() -> Self {
         let root = GtkBox::new(Orientation::Vertical, 0);
 
-        let header = adw::HeaderBar::new();
-        let title = adw::WindowTitle::new("Package Manager", "Manage system packages");
-        header.set_title_widget(Some(&title));
-        
-        let refresh_btn = Button::with_label("Refresh");
-        refresh_btn.set_icon_name("view-refresh-symbolic");
-        header.pack_end(&refresh_btn);
-        
-        root.append(&header);
-
         // Action buttons bar
         let action_bar = GtkBox::new(Orientation::Horizontal, 12);
         action_bar.set_margin_top(12);
